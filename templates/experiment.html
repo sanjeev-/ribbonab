@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+        <h2 class="text-center">{{experiment_name}}</h2>
+        <h6 class="text-center"><mark>{{rope_decision}}</mark></h6>
+        <p></p>
+        <p></p>
+        <div class="row">
+        <div class="col-sm-8" id="large_div">
+        <h4><small class="p-3 mb-2 text-success">{{control}} (control) conversion rate:  </small>{{control_perc}}%</h4>
+        <p></p>
+        <p></p>
+        <h4><small class="p-3 mb-2 text-primary">{{hypothesis}} (hypothesis) conversion rate:  </small>{{hypothesis_perc}}%</h4>
+    </div>
+    <div class="col-sm-4" id="small_div">ß
+        <p><small>author  </small> {{experiment_person}}</p>
+        <p><small>decision alpha</small> {{decision_alpha}}</p>
+        <p><small>{{control}} sample size </small>{{control_sample_size}}</p>
+        <p><small>{{hypothesis}} sample size </small> {{hypothesis_sample_size}}</p>
+        <p><small>ROPE </small> [{{rope_lower}}%, {{rope_upper}}%]</p>
+
+    </div>
+    </div>
+        <p></p>
+        <script>
+        
+                var jsondata = {{ab_json|safe}};
+
+                var controldata = jsondata.posterior_control;
+
+                var hypothesisdata = jsondata.posterior_hypothesis;
+
+                var liftdata = jsondata.lift_pdf;
+
+                console.log(liftdata);
+
+
+                // set the dimensions and margins of the graph
+                var margin = {top: 20, right: 20, bottom: 30, left: 50},
+                    width = 960 - margin.left - margin.right,
+                    height = 500 - margin.top - margin.bottom;
+
+
+
+                // set the ranges
+                var x = d3.scaleLinear().range([0, width]);
+                var y = d3.scaleLinear().range([height, 0]);
+
+                // define the line
+                var controlline = d3.line()
+                    .x(function(d) { return x(d.x); })
+                    .y(function(d) { return y(d.y); });
+
+                // define the line
+                var hypothesisline = d3.line()
+                    .x(function(d) { return x(d.x); })
+                    .y(function(d) { return y(d.y); });            
+                
+                
+
+                // append the svg obgect to the body of the page
+                // appends a 'group' element to 'svg'
+                // moves the 'group' element to the top left margin
+                var svg = d3.select("#container_div").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                    .attr("transform",
+                        "translate(" + margin.left + "," + margin.top + ")");
+
+                svg.append("text")
+                    .attr("x", (width / 2))             
+                    .attr("y", 0 - (margin.top / 4))
+                    .attr("text-anchor", "middle")  
+                    .style("font-size", "16px") 
+                    .style("text-decoration", "underline")  
+                    .text("Hypothesis Posterior Distrubtion vs Control Posterior Distrubtion");
+
+
+                // format the data
+                controldata.forEach(function(d) {
+                    d.x = +d.x;
+                    d.y = +d.y;
+                });
+
+                // Scale the range of the data
+                x.domain(d3.extent(controldata, function(d) { return d.x; }));
+                y.domain([0, d3.max(controldata, function(d) { return d.y; })]);
+
+                // Add the valueline path.
+                svg.append("path")
+                    .data([controldata])
+                    .attr("class", "line")
+                    .attr("d", controlline)
+                    .attr('stroke-width',2.5)
+                    .attr('fill', 'none')
+                    .attr('stroke', "green");
+
+                // format the data
+                hypothesisdata.forEach(function(d) {
+                    d.x = +d.x;
+                    d.y = +d.y;
+                });
+
+                // Scale the range of the data
+                x.domain(d3.extent(hypothesisdata, function(d) { return d.x; }));
+                y.domain([0, d3.max(hypothesisdata, function(d) { return d.y; })]);
+
+                // Add the valueline path.
+                svg.append("path")
+                    .data([hypothesisdata])
+                    .attr("class", "line")
+                    .attr("d", hypothesisline)
+                    .attr('stroke-width',2.5)
+                    .attr('fill', 'none')
+                    .attr('stroke', "blue");
+
+                // Add the X Axis
+                svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x));
+
+                // Add the Y Axis
+                svg.append("g")
+                    .call(d3.axisLeft(y));
+
+                // set the dimensions and margins of the graph
+                var margin2 = {top: 20, right: 20, bottom: 30, left: 50},
+                    width2 = 960 - margin2.left - margin2.right,
+                    height2 = 500 - margin2.top - margin2.bottom;
+
+                // set the ranges
+                var x2 = d3.scaleLinear().range([0, width2]);
+                var y2 = d3.scaleLinear().range([height2, 0]);
+
+                // define the line
+                var liftline = d3.line()
+                    .x(function(d) { return x2(d.x); })
+                    .y(function(d) { return y2(d.y); });
+
+                // append the svg object to the body of the page
+                // appends a 'group' element to 'svg'
+                // moves the 'group' element to the top left margin
+                var svg2 = d3.select("#container_div").append("svg")
+                    .attr("width", width2 + margin2.left + margin2.right)
+                    .attr("height", height2 + margin2.top + margin2.bottom)
+                    .append("g")
+                    .attr("transform",
+                        "translate(" + margin2.left + "," + margin2.top + ")");
+
+                svg2.append("text")
+                    .attr("x", (width2 / 2))             
+                    .attr("y", 0 - (margin2.top / 4))
+                    .attr("text-anchor", "middle")  
+                    .style("font-size", "16px") 
+                    .style("text-decoration", "underline")  
+                    .text("Lift Posterior Distribution");
+
+                // format the data
+                liftdata.forEach(function(d) {
+                    d.x = +d.x;
+                    d.y = +d.y;
+                });
+
+                // Scale the range of the data
+                x2.domain(d3.extent(liftdata, function(d) { return d.x; }));
+                y2.domain([0, d3.max(liftdata, function(d) { return d.y; })]);
+
+                // Add the valueline path.
+                svg2.append("path")
+                    .attr("class", "line")
+                    .attr("d", liftline(liftdata))
+                    .attr('stroke-width',2)
+                    .attr('fill', 'red')
+                    .attr('stroke', "red");
+
+                // Add the X Axis
+                svg2.append("g")
+                    .attr("transform", "translate(0," + height2 + ")")
+                    .call(d3.axisBottom(x2));
+
+                // Add the Y Axis
+                svg2.append("g")
+                    .call(d3.axisLeft(y2));
+
+                legend = svg.append("g")
+                .attr("class","legend")
+                .attr("transform","translate(50,30)")
+                .style("font-size","12px")
+                .call(d3.legend)
+
+        </script>
+    {% endblock %}

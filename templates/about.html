@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<h3>Reasons for the Bayesian Test</h3>
+
+There are three major advantages for using a Bayesian AB Test :
+<p></p>
+<ul>1) It's easier to interpret the results</ul>
+
+<ul>2) You can check the test/peek as much as you'd like (<a href="http://www.evanmiller.org/how-not-to-run-an-ab-test.html">why peeking screws things up</a>)</ul>
+
+<ul>3) You can alter materials/landing pages/etc in the middle of the test</ul>
+
+
+<h3>How it works</h3>
+
+<p>We first calculate the High Posterior Density (HPD) region for the test metric we wish to check -- in this instance, the lift.  The lift
+is defined as the expected difference between the control and hypothesis variable.  E.g. if we currently have an orange CTA and want to
+test a purple one, and the orange CTA has a 20% clickthrough rate and the purple CTA has a 25% clickthrough rate, then our lift is 5%.  However,
+since we don't know what the actual true lift is, we have to estimate it statistically and it is represented by a probability distribution</p>
+
+<p>The HPD region is a function of the alpha we decide to use, which is by default 95%.  The HPD is values of the lift that accounts for 95% of
+    the integral of (i.e., area under) the lift probability distribution.  It is sort of analogous to the 95% confidence interval in non-Bayesian (frequentist) statistics.  So when
+    we calculate the HPD of the lift, that is calculating the range of lift values that account for 95% of the probability distribution.  So in
+    the ornage vs purple example, instead of knowing the lift is 5%, the HPD would look something like [2.5%, 7.5%].
+</p>
+
+<p>
+    The final thing you need to make a Bayesian AB Test decision is the ROPE, or the Region Of Practical Equivalence.  This is basically a buffer
+    on the current conversion rate (orange CTA in our example) that the change in conversion, even if statistically significant, is "practically equivalent"
+    to the orange CTA.  I.e., the change isn't enough to warrant changing anything.  As a default this is set to +/- 10% of the conversion rate.  So if 
+    the orange CTA is converting at 20%, the purple CTA will have to convert at higher than 22% (1.1 * 20%) or less than 18% for us to conclude there is a 
+    practical difference between the two.</p>
+<p>
+    So what we are ultimately doing is calculating the HPD for the lift, and seeing if it is inside or outside of the ROPE.  If it is wholly
+    outside the HPD, there is a conclusive test result (and positive or negative for the hypothesis depending on if lift is positive or negative).
+    If the ROPE and HPD are overlapping, the test is inconclusive.
+
+</p>
+
+<h3>External Links</h3>
+
+<p>I used the following resources: </p>
+
+<ul>(A) <a href="http://www.claudiobellei.com/2017/11/02/bayesian-AB-testing/">Claudio Bellei: Bayesian AB Testing Step-by-Step guide</a></ul>
+
+<ul>(B) <a href="https://www.evanmiller.org/bayesian-ab-testing.html#binary_ab">Evan Miller: Formulas for A/B Testing</a></ul>
+
+<ul>(C) <a href="https://web.archive.org/web/20150419163005/http://www.bayesianwitch.com/blog/2014/bayesian_ab_test.html">Chris Stucchio: Agile A/B Testing With Bayesian Statistics and Python </a></ul>
+
+{% endblock %}

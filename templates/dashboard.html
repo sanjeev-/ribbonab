@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+        <h4> <mark>active experiments </mark> </h4>
+        <p></p>
+
+        {% for experiment in qs %}
+        <h6 class="text-primary" ><a href="/experiments/{{experiment.slug}}">{{ experiment.experiment_name }}</a> </h6>
+         <p style="display:inline"><small class="text-muted">author</small> {{experiment.experiment_person}}  <small class="text-muted"> type </small>{{ experiment.experiment_type }} <small class="text-muted">control</small> {{ experiment.control }} <small class="text-muted">hypothesis</small> {{ experiment.hypothesis }}</p>
+        <p></p>
+        {% endfor %}
+{% endblock %}
